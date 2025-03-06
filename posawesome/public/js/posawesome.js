@@ -7555,35 +7555,136 @@ function print() { __p += __j.call(arguments, '') }
                     align: "start"
                 }, {title: __("UOM"), key: "stock_uom", align: "start"}];
                 return this.pos_profile.posa_display_item_code || e.splice(1, 1), e
-            }, add_item(e, t) {
+            },
+            add_item(e, t) {
                 item = h({}, t.item), item.has_variants ? this.emitter.emit("open_variants_model", {
                     item,
                     items: this.items
                 }) : ((!item.qty || item.qty === 1) && (item.qty = Math.abs(this.qty)), this.emitter.emit("add_item", item), this.qty = 1)
-            }, enter_event() {
-                let e = !1;
+            },
+            enter_event() {
+                // let e = !1;
+                // if (!this.filtered_items.length || !this.first_search) return;
+                // let t = this.get_item_qty(this.first_search), o = h({}, this.filtered_items[0]);
+                // console.log('----------ttttttttttttttttttttt------------------', t)
+                // o.qty = parseFloat(t), o.item_barcode.forEach(n => {
+                //     this.search == n.barcode && (o.uom = n.posa_uom, e = !0)
+                // }),
+                // !o.to_set_serial_no && o.has_serial_no && this.pos_profile.posa_search_serial_no && o.serial_no_data.forEach(n => {
+                //     this.search && n.serial_no == this.search && (o.to_set_serial_no = this.first_search, e = !0)
+                // }),
+                // this.flags.serial_no && (o.to_set_serial_no = this.flags.serial_no), !o.to_set_batch_no && o.has_batch_no && this.pos_profile.posa_search_batch_no && o.batch_no_data.forEach(n => {
+                //     this.search && n.batch_no == this.search && (o.to_set_batch_no = this.first_search, o.batch_no = this.first_search, e = !0)
+                // }),
+                //     console.log('--XXXX--------this.search', this.search)
+                // this.flags.batch_no && (o.to_set_batch_no = this.flags.batch_no), this.first_search && (this.first_search.toLowerCase() == o.item_code.toLowerCase() || this.first_search.toLowerCase() == o.item_name.toLowerCase()) && (e = !0), e &&
+                // (
+                //     this.add_item(null, {item: o}),
+                //         this.search = null,
+                //         this.first_search = null,
+                //         this.debounce_search = null,
+                //         this.flags.serial_no = null,
+                //         this.flags.batch_no = null,
+                //         this.qty = 1,
+                //         this.$refs.debounce_search.focus()
+                // )
+                let match = false;
                 if (!this.filtered_items.length || !this.first_search) return;
-                let t = this.get_item_qty(this.first_search), o = h({}, this.filtered_items[0]);
-                o.qty = parseFloat(t), o.item_barcode.forEach(n => {
-                    this.search == n.barcode && (o.uom = n.posa_uom, e = !0)
-                }), !o.to_set_serial_no && o.has_serial_no && this.pos_profile.posa_search_serial_no && o.serial_no_data.forEach(n => {
-                    this.search && n.serial_no == this.search && (o.to_set_serial_no = this.first_search, e = !0)
-                }), this.flags.serial_no && (o.to_set_serial_no = this.flags.serial_no), !o.to_set_batch_no && o.has_batch_no && this.pos_profile.posa_search_batch_no && o.batch_no_data.forEach(n => {
-                    this.search && n.batch_no == this.search && (o.to_set_batch_no = this.first_search, o.batch_no = this.first_search, e = !0)
-                }), this.flags.batch_no && (o.to_set_batch_no = this.flags.batch_no), this.first_search && (this.first_search.toLowerCase() == o.item_code.toLowerCase() || this.first_search.toLowerCase() == o.item_name.toLowerCase()) && (e = !0), e && (this.add_item(null, {item: o}), this.search = null, this.first_search = null, this.debounce_search = null, this.flags.serial_no = null, this.flags.batch_no = null, this.qty = 1, this.$refs.debounce_search.focus())
-            }, search_onchange() {
+                const qty = this.get_item_qty(this.first_search);
+                const new_item = {...this.filtered_items[0]};
+                new_item.qty = flt(qty);
+                new_item.item_barcode.forEach((element) => {
+                    if (this.search == element.barcode) {
+                        new_item.uom = element.posa_uom;
+                        match = true;
+                    }
+                });
+                if (
+                    !new_item.to_set_serial_no &&
+                    new_item.has_serial_no &&
+                    this.pos_profile.posa_search_serial_no
+                ) {
+                    new_item.serial_no_data.forEach((element) => {
+                        if (this.search && element.serial_no == this.search) {
+                            new_item.to_set_serial_no = this.first_search;
+                            match = true;
+                        }
+                    });
+                }
+                if (this.flags.serial_no) {
+                    new_item.to_set_serial_no = this.flags.serial_no;
+                }
+                if (
+                    !new_item.to_set_batch_no &&
+                    new_item.has_batch_no &&
+                    this.pos_profile.posa_search_batch_no
+                ) {
+                    new_item.batch_no_data.forEach((element) => {
+                        if (this.search && element.batch_no == this.search) {
+                            new_item.to_set_batch_no = this.first_search;
+                            new_item.batch_no = this.first_search;
+                            match = true;
+                        }
+                    });
+                }
+                if (this.flags.batch_no) {
+                    new_item.to_set_batch_no = this.flags.batch_no;
+                }
+                this.add_item(null, {item: new_item});
+                this.search = null;
+                this.first_search = null;
+                this.debounce_search = null;
+                this.flags.serial_no = null;
+                this.flags.batch_no = null;
+                this.qty = 1;
+                this.$refs.debounce_search.focus();
+            },
+            search_onchange() {
                 let e = this;
                 e.pos_profile.pose_use_limit_search ? e.get_items() : e.enter_event()
-            }, get_item_qty(e) {
-                let t = Math.abs(this.qty);
+            },
+            get_item_qty(e) {
+                // let t = Math.abs(this.qty);
+                let first_search = e;
+                let scal_qty = Math.abs(this.qty);
                 if (e.startsWith(this.pos_profile.posa_scale_barcode_start)) {
-                    let o = e.substr(7, 5), n;
-                    o.startsWith("0000") ? n = "0.00" + o.substr(4) : o.startsWith("000") ? n = "0.0" + o.substr(3) : o.startsWith("00") ? n = "0." + o.substr(2) : o.startsWith("0") ? n = o.substr(1, 1) + "." + o.substr(2, o.length) : o.startsWith("0") || (n = o.substr(0, 2) + "." + o.substr(2, o.length)), t = n
+                    // console.log('get_item_qty-----e-----', e)
+                    // console.log('get_item_qty-----e-----this.first_search', this.first_search)
+                    // console.log('get_item_qty-----e-----first_search', first_search)
+                    // let o = e.substr(7, 5), n;
+                    // o.startsWith("0000") ? n = "0.00" + o.substr(4) : o.startsWith("000") ? n = "0.0" + o.substr(3) : o.startsWith("00") ? n = "0." + o.substr(2) : o.startsWith("0") ? n = o.substr(1, 1) + "." + o.substr(2, o.length) : o.startsWith("0") || (n = o.substr(0, 2) + "." + o.substr(2, o.length)), t = n
+                    let pesokg1 = first_search.substr(7, 5);
+                    let pesokg;
+                    if (pesokg1.startsWith("0000")) {
+                        pesokg = "0.00" + pesokg1.substr(4);
+                    } else if (pesokg1.startsWith("000")) {
+                        pesokg = "0.0" + pesokg1.substr(3);
+                    } else if (pesokg1.startsWith("00")) {
+                        pesokg = "0." + pesokg1.substr(2);
+                    } else if (pesokg1.startsWith("0")) {
+                        pesokg =
+                            pesokg1.substr(1, 1) + "." + pesokg1.substr(2, pesokg1.length);
+                    } else if (!pesokg1.startsWith("0")) {
+                        pesokg =
+                            pesokg1.substr(0, 2) + "." + pesokg1.substr(2, pesokg1.length);
+                    }
+                    console.log('scal_qty-----', scal_qty)
+                    scal_qty = pesokg;
                 }
-                return t
+                // return t
+                return scal_qty
             }, get_search(e) {
-                let t = "";
-                return e && e.startsWith(this.pos_profile.posa_scale_barcode_start) ? t = e.substr(0, 7) : t = e, t
+                // let t = "";
+                // return e && e.startsWith(this.pos_profile.posa_scale_barcode_start) ? t = e.substr(0, 7) : t = e, t
+                let search_term = "";
+                let first_search = e;
+                if (first_search && first_search.startsWith(this.pos_profile.posa_scale_barcode_start)) {
+                    search_term = first_search.substr(0, 7);
+                } else {
+                    search_term = first_search;
+                }
+                console.log('-----search_term------', search_term)
+                return search_term;
             }, esc_event() {
                 this.search = null, this.first_search = null, this.qty = 1, this.$refs.debounce_search.focus()
             }, update_items_details(e) {
@@ -8440,6 +8541,9 @@ function print() { __p += __j.call(arguments, '') }
             }, subtract_one(e) {
                 e.qty = flt(e.qty) - 1, e.qty == 0 && this.remove_item(e), this.calc_stock_qty(e, e.qty), this.$forceUpdate()
             }, add_item(e) {
+                console.log('add item', e)
+                // e.qty = 0.5
+                console.log('add item-qty', e.qty)
                 e.uom || (e.uom = e.stock_uom);
                 let t = -1;
                 if (this.new_line || (t = this.items.findIndex(o => o.item_code === e.item_code && o.uom === e.uom && !o.posa_is_offer && !o.posa_is_replace && o.batch_no === e.batch_no)), t === -1 || this.new_line) {
@@ -9758,37 +9862,37 @@ function print() { __p += __j.call(arguments, '') }
                                 dark: "",
                                 onClick: t[10] || (t[10] = H => r.cancel_dialog = !0)
                             }, {default: C(() => [Oe(ae(e.__("Cancel")), 1)]), _: 1})]), _: 1
-                        })
-                        //     , u(g, {cols: "6", class: "pa-1"}, {
-                        //     default: C(() => [u(d, {
-                        //         block: "",
-                        //         class: "pa-0",
-                        //         color: "accent",
-                        //         dark: "",
-                        //         onClick: i.new_invoice
-                        //     }, {default: C(() => [Oe(ae(e.__("Save/New")), 1)]), _: 1}, 8, ["onClick"])]), _: 1
-                        // })
+                        }),
+                            (r.pos_profile.custom_hide_save_button) ? '' : u(g, {cols: "6", class: `pa-1 ${(r.pos_profile.custom_hide_save_button) ? 'd-none' : ''}`}, {
+                                default: C(() => [u(d, {
+                                    block: "",
+                                    class: "pa-0",
+                                    color: "accent",
+                                    dark: "",
+                                    onClick: i.new_invoice
+                                }, {default: C(() => [Oe(ae(e.__("Save/New")), 1)]), _: 1}, 8, ["onClick"])]), _: 1
+                            })
                             , u(g, {class: "pa-1"}, {
-                            default: C(() => [u(d, {
-                                block: "",
-                                class: "pa-0",
-                                color: "success",
-                                onClick: i.show_payment,
-                                dark: ""
-                            }, {default: C(() => [Oe(ae(e.__("PAY")), 1)]), _: 1}, 8, ["onClick"])]), _: 1
-                        }), r.pos_profile.posa_allow_print_draft_invoices ? (se(), Ee(g, {
-                            key: 1,
-                            cols: "6",
-                            class: "pa-1"
-                        }, {
-                            default: C(() => [u(d, {
-                                block: "",
-                                class: "pa-0",
-                                color: "primary",
-                                onClick: i.print_draft_invoice,
-                                dark: ""
-                            }, {default: C(() => [Oe(ae(e.__("Print Draft")), 1)]), _: 1}, 8, ["onClick"])]), _: 1
-                        })) : Re("v-if", !0)]), _: 1
+                                default: C(() => [u(d, {
+                                    block: "",
+                                    class: "pa-0",
+                                    color: "success",
+                                    onClick: i.show_payment,
+                                    dark: ""
+                                }, {default: C(() => [Oe(ae(e.__("PAY")), 1)]), _: 1}, 8, ["onClick"])]), _: 1
+                            }), r.pos_profile.posa_allow_print_draft_invoices ? (se(), Ee(g, {
+                                key: 1,
+                                cols: "6",
+                                class: "pa-1"
+                            }, {
+                                default: C(() => [u(d, {
+                                    block: "",
+                                    class: "pa-0",
+                                    color: "primary",
+                                    onClick: i.print_draft_invoice,
+                                    dark: ""
+                                }, {default: C(() => [Oe(ae(e.__("Print Draft")), 1)]), _: 1}, 8, ["onClick"])]), _: 1
+                            })) : Re("v-if", !0)]), _: 1
                     })]), _: 1
                 })]), _: 1
             })]), _: 1
@@ -9952,7 +10056,7 @@ function print() { __p += __j.call(arguments, '') }
             }, 8, ["modelValue"])]), _: 1
         })
     }
-
+    
     vd.render = Hx;
     vd.__file = "../posawesome/posawesome/public/js/posapp/components/pos/OpeningDialog.vue";
     var zx = vd;
@@ -10083,13 +10187,16 @@ function print() { __p += __j.call(arguments, '') }
                     e.amount = 0
                 })
             }, load_print_page() {
-                let e = this.pos_profile.print_format_for_online || this.pos_profile.print_format,
-                    t = this.pos_profile.letter_head || 0,
-                    o = frappe.urllib.get_base_url() + "/printview?doctype=Sales%20Invoice&name=" + this.invoice_doc.name + "&trigger_print=1&format=" + e + "&no_letterhead=" + t,
-                    n = window.open(o, "Print");
-                n.addEventListener("load", function () {
-                    n.print()
-                }, !0)
+                // Open print popup after 5 seconds
+                setTimeout(() => {
+                    let e = this.pos_profile.print_format_for_online || this.pos_profile.print_format,
+                        t = this.pos_profile.letter_head || 0,
+                        o = frappe.urllib.get_base_url() + "/printview?doctype=Sales%20Invoice&name=" + this.invoice_doc.name + "&trigger_print=1&format=" + e + "&no_letterhead=" + t,
+                        n = window.open(o, "Print");
+                    n.addEventListener("load", function () {
+                        n.print()
+                    }, !0)
+                }, 5000)
             }, validate_due_date() {
                 let e = frappe.datetime.now_date(), t = Date.parse(e);
                 Date.parse(this.invoice_doc.due_date) < t && setTimeout(() => {
@@ -27922,3 +28029,4 @@ Expected #hex, #hexa, rgb(), rgba(), hsl(), hsla(), object or number`)
  * @license MIT
  **/
 //# sourceMappingURL=posawesome.bundle.DADMF6KG.js.map
+
