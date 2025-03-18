@@ -10056,7 +10056,7 @@ function print() { __p += __j.call(arguments, '') }
             }, 8, ["modelValue"])]), _: 1
         })
     }
-    
+
     vd.render = Hx;
     vd.__file = "../posawesome/posawesome/public/js/posapp/components/pos/OpeningDialog.vue";
     var zx = vd;
@@ -10998,6 +10998,7 @@ function print() { __p += __j.call(arguments, '') }
                 }), u(L, {class: "pa-0"}, {
                     default: C(() => [u(I, null, {
                         default: C(() => [u(c, {
+                            
                             density: "compact",
                             variant: "outlined",
                             color: "primary",
@@ -28029,4 +28030,3 @@ Expected #hex, #hexa, rgb(), rgba(), hsl(), hsla(), object or number`)
  * @license MIT
  **/
 //# sourceMappingURL=posawesome.bundle.DADMF6KG.js.map
-
