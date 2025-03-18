@@ -10998,7 +10998,6 @@ function print() { __p += __j.call(arguments, '') }
                 }), u(L, {class: "pa-0"}, {
                     default: C(() => [u(I, null, {
                         default: C(() => [u(c, {
-                            
                             density: "compact",
                             variant: "outlined",
                             color: "primary",
